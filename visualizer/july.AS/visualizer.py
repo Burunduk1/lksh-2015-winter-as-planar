@@ -1,42 +1,30 @@
+# TODO
+# Canvas на весь экран(+)
+# Запилить хранение объектов
+# Добалвение ребер
+# Выделение ребер, которые хочешь добавить
+
 import sys, math
 
 from tkinter import *
 
-# pnt class
-class pnt:
-  def __init__(self, x, y):
-    self.x = x
-    self.y = y
-
-  @classmethod
-  def byAngle(self, a):
-    return pnt(math.cos(a), math.sin(a))
-  
-  def d2(s):
-    return s.x * s.x + s.y * s.y
-  def d(s):
-    return math.sqrt(s.d2())
-  def __add__(a, b):
-    return pnt(a.x + b.x, a.y + b.y)
-  def __str__(s):
-    return "pnt<" + str(s.x) + "," + str(s.y) + ">"
-
-pnt.__sub__ = lambda a, b: pnt(a.x - b.x, a.y - b.y)
-
-
 # create the root window
 
 maxVertex = 100
+maxEdge = 5050
 vertexR = 8
 vertexNum = 0
 WAIT = 0
 ADD_VERTEX = 1
-ADD_EDGE = 1
+ADD_EDGE = 2
 whatToDo = WAIT
 
 # граф хранится матрицой смежности
 w = [[0] * maxVertex for i in range(maxVertex)]
 pos = [[0] * 2 for i in range(maxVertex)]
+
+VERTS = [0] * maxVertex
+EDGES = [0] * maxEdge
 
 def saveGraph(e):
 	global pos, vertexNum, w
@@ -55,6 +43,7 @@ def saveGraph(e):
 
 def update():
 	global graph, vertexR, vertexNum, pos
+	graph.delete('all')
 	for i in range(vertexNum):
 		graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="black")
 	for i in range(vertexNum):
@@ -79,8 +68,10 @@ def loadGraph(e):
 	whatToDo = WAIT
 	update()
 
+focus1, focus2 = 0, 0
+
 def interactive(e):
-	global whatToDo, vertexNum, pos, w
+	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE
 	if whatToDo == ADD_VERTEX:
 		print('Adding vertex...')
 		if vertexNum == maxVertex:
@@ -90,12 +81,20 @@ def interactive(e):
 			pos[vertexNum][1] = e.y
 			vertexNum += 1
 			update()
+	elif whatToDo == ADD_EDGE:
+		print('=)')
+		
 
 def addVertexStatus(e):
 	global whatToDo, ADD_VERTEX
 	whatToDo = ADD_VERTEX
 	print('Add some verteces')
-	
+
+def addEdgeStatus(e):
+	global whatToDo, ADD_EDGE
+	whatToDo = ADD_EDGE
+	focus1, focus2 = -1, -1
+	print('Add some edges')
 
 # начало графики
 root = Tk()
@@ -118,11 +117,12 @@ loadGraphButton.grid(row = 0, column = 3)
 saveGraphButton.bind("<Button-1>", saveGraph)
 loadGraphButton.bind("<Button-1>", loadGraph)
 addVertexButton.bind("<Button-1>", addVertexStatus)
+addEdgeButton.bind("<Button-1>", addEdgeStatus)
 
 # создание графа
 
-graph = Canvas(root, width = 300, height = 300)
-graph.grid(row = 1, column = 0)
+graph = Canvas(root, width = 850, height = 400)
+graph.grid(row = 1, column = 0, columnspan = 4)
 graph.bind("<Button-1>", interactive)
 
 # Start the window's event-loop
