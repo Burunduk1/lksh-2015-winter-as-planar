@@ -68,7 +68,7 @@ def loadGraph(e):
 	fin = open('graph_read.txt', 'r')
 	vertexNum = int(fin.readline())
 	for i in range(vertexNum):
-		x, y = map(int, fin.readline().split())
+		x, y = map(float, fin.readline().split())
 		pos[i][0] = x
 		pos[i][1] = y
 	for i in range(vertexNum):
