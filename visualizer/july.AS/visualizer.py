@@ -12,7 +12,7 @@ from math import sqrt
 
 # create the root window
 
-maxVertex = 10
+maxVertex = 100
 maxEdge = 5050
 vertexR = 8
 vertexNum = 0
@@ -66,9 +66,12 @@ def loadGraph(e):
 		pos[i][0] = x
 		pos[i][1] = y
 	for i in range(vertexNum):
-		w[i] = fin.readline().split()
+		l = fin.readline().split()
 		for j in range(vertexNum):
-			w[i][j] = int(w[i][j])
+			if j < len(l):
+				w[i][j] = int(l[j])
+			else:
+				w[i][j] = 0
 
 	fin.close()
 	print('Loaded')
@@ -97,19 +100,18 @@ def interactive(e):
 			print('Can not find any vertex')
 		elif focus1 == -1:
 			focus1 = focus
-			print('First selected :', focus1)
 			update()
 		elif focus2 == -1:
 			if focus1 != focus:
-				if w[focus1][focus]:
-					print('The edge already exists')
+				focus2 = focus
+				if w[focus1][focus2]:
+					w[focus1][focus2] = w[focus2][focus1] = 0
+					print('Edge have been removed ', focus1, focus2)
 				else:
-					focus2 = focus
-					print('Second vertex :', focus1, focus2)
-					print('Edge have been added')
 					w[focus1][focus2] = w[focus2][focus1] = 1
-					focus1, focus2 = -1, -1
-					update()
+					print('Edge have been added ', focus1, focus2)
+				focus1, focus2 = -1, -1
+				update()
 			else:
 				focus1 = focus2 = -1
 				update()
