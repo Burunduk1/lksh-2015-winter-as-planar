@@ -12,9 +12,9 @@ typedef double ld;
 const int ITERATION_COUNT = 200;
 const ld DEC = 0.9;
 const ld MOVE_DIST = 0.1;
-const ld GRAVITY = -2;
-const ld TENSION = 5;
-const ld NORM_LEN = 2;
+const ld GRAVITY = -4;
+const ld TENSION = 3;
+const ld NORM_LEN = 4;
 
 struct Point{
     ld x, y;
@@ -78,7 +78,10 @@ Point edge_force(Point a, Point b)
     Point f;
     f = b - a;
     f = f / f.len();
+//    if (dist(a, b) > NORM_LEN)
     f = f * TENSION * (dist(a, b) - NORM_LEN);
+//    else
+//        f = Point();
     return f;
 
 }
@@ -139,11 +142,11 @@ int main()
         {
             p[i] = p[i] - cntr;
         }
-//        for (i = 0; i < n; i++)
-//        {
-//            printf("%f %f\n", p[i].x, p[i].y);
-//        }
-//        printf("\n");
+        for (i = 0; i < n; i++)
+        {
+            cerr << p[i].x << ' ' << p[i].y << endl;
+        }
+        cerr << endl;
     }
     ld mx, my;
     mx = p[0].x;
