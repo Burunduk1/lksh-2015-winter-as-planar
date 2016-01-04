@@ -40,11 +40,16 @@ DRAW_GRAPH = 1
 whatToDO = WAIT
 
 def saveGraph(e):
+	global pos, vertexNum, w
 	fout = open('graph_save.txt', 'w')
-	fout.write(str(vertexNum))
+	fout.write(str(vertexNum) + '\n')
+	for i in range(vertexNum):
+		fout.write(str(pos[i][0]) + ' ' + str(pos[i][1]) + '\n')
+
 	for i in range(vertexNum):
 		for j in range(vertexNum):
 			fout.write(str(w[i][j]) + ' ')
+		fout.write('\n')
 	fout.close()
 	print('saved')
 
@@ -62,7 +67,6 @@ def loadGraph(e):
 	global vertexNum, pos, w
 	fin = open('graph_read.txt', 'r')
 	vertexNum = int(fin.readline())
-	print(vertexNum)
 	for i in range(vertexNum):
 		x, y = map(int, fin.readline().split())
 		pos[i][0] = x
@@ -73,8 +77,6 @@ def loadGraph(e):
 			w[i][j] = int(w[i][j])
 
 	fin.close()
-	for i in range(vertexNum):
-		print(w[i])
 	update()
 
 # начало графики
