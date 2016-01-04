@@ -21,7 +21,7 @@ const int max_n = 10000, steps = 100;
 bool found[max_n];
 vector<int> g[max_n];
 vector<int> cycle;
-const double dist = 20;
+const double dist = 120;
 double x[max_n], y[max_n];
 int gr[max_n][max_n];
 
@@ -86,13 +86,13 @@ int main()
     cout << fixed << setprecision(3);
     //cout << n1 << endl;
     for (int i = 0; i < n1; i++)
-        cout << x[i] + 25 << " " << y[i] + 25 << endl;
+        cout << x[i] + 160 << " " << y[i] + 160 << endl;
     for (int i = 0; i < n1; i++){
         for (int j = 0; j < n1; j++)
             if (gr[i][j])
-                cout << "1";
+                cout << "1 ";
             else
-                cout << "0";
+                cout << "0 ";
         cout << endl;
     }
     return 0;
