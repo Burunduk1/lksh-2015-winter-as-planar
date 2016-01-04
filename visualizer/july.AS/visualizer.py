@@ -1,16 +1,18 @@
 # TODO
 # Canvas на весь экран(+)
-# Запилить хранение объектов
+# Запилить хранение объектов(+)
 # Добалвение ребер
-# Выделение ребер, которые хочешь добавить
+# Выделение вершин, ребро между которыми хотим добавить
+# Запихать координаты в данный прямоугольник
 
-import sys, math
+import sys, time
 
 from tkinter import *
+from math import sqrt
 
 # create the root window
 
-maxVertex = 100
+maxVertex = 10
 maxEdge = 5050
 vertexR = 8
 vertexNum = 0
@@ -18,6 +20,7 @@ WAIT = 0
 ADD_VERTEX = 1
 ADD_EDGE = 2
 whatToDo = WAIT
+focus1, focus2 = -1, -1
 
 # граф хранится матрицой смежности
 w = [[0] * maxVertex for i in range(maxVertex)]
@@ -42,14 +45,17 @@ def saveGraph(e):
 	print('saved')
 
 def update():
-	global graph, vertexR, vertexNum, pos
+	global graph, vertexR, vertexNum, pos, focus1, focus2
 	graph.delete('all')
 	for i in range(vertexNum):
-		graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="black")
+		if i == focus1 or i == focus2:
+			VERTS[i] = graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="blue", width=2)
+		else:
+			VERTS[i] = graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="red", width=2)
 	for i in range(vertexNum):
 		for j in range(i):
 			if w[i][j]:
-				graph.create_line(pos[i][0], pos[i][1], pos[j][0], pos[j][1])
+				EDGES[i] = graph.create_line(pos[i][0], pos[i][1], pos[j][0], pos[j][1])
 
 def loadGraph(e):
 	global vertexNum, pos, w
@@ -65,13 +71,12 @@ def loadGraph(e):
 			w[i][j] = int(w[i][j])
 
 	fin.close()
-	whatToDo = WAIT
+	print('Loaded')
 	update()
-
-focus1, focus2 = 0, 0
+	whatToDo = WAIT
 
 def interactive(e):
-	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE
+	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2
 	if whatToDo == ADD_VERTEX:
 		print('Adding vertex...')
 		if vertexNum == maxVertex:
@@ -82,8 +87,33 @@ def interactive(e):
 			vertexNum += 1
 			update()
 	elif whatToDo == ADD_EDGE:
-		print('=)')
-		
+		focus = -1
+		for i in range(vertexNum):
+			ro = sqrt(((pos[i][0] - e.x) ** 2) + ((pos[i][1] - e.y) ** 2))
+			if 1.3 * ro <= vertexR:
+				focus = i
+				break
+		if focus == -1:
+			print('Can not find any vertex')
+		elif focus1 == -1:
+			focus1 = focus
+			print('First selected :', focus1)
+			update()
+		elif focus2 == -1:
+			if focus1 != focus:
+				if w[focus1][focus]:
+					print('The edge already exists')
+				else:
+					focus2 = focus
+					print('Second vertex :', focus1, focus2)
+					print('Edge have been added')
+					w[focus1][focus2] = w[focus2][focus1] = 1
+					focus1, focus2 = -1, -1
+					update()
+			else:
+				focus1 = focus2 = -1
+				update()
+				print('Unselected')
 
 def addVertexStatus(e):
 	global whatToDo, ADD_VERTEX
