@@ -4,17 +4,22 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <algorithm>
 
 using namespace std;
 
 typedef double ld;
 
-const int ITERATION_COUNT = 200;
+const ld pi = 2 * acos(0);
+
+const int ITERATION_COUNT = 600;
 const ld DEC = 0.9;
-const ld MOVE_DIST = 0.1;
-const ld GRAVITY = -4;
+const ld FACTOR = 1;
+const ld MOVE_DIST = 0.01;
+const ld GRAVITY = 3;
 const ld TENSION = 3;
-const ld NORM_LEN = 4;
+const ld NORM_LEN = 3;
+const ld DIST = 10000;
 
 struct Point{
     ld x, y;
@@ -69,7 +74,7 @@ Point point_force(Point a, Point b)
     Point f;
     f = b - a;
     f = f / f.len();
-    f = f * GRAVITY * (1 / (dist(a, b) * dist(a, b)));
+    f = f * GRAVITY * (1 / (dist(a, b)));
     return f;
 }
 
@@ -88,6 +93,7 @@ Point edge_force(Point a, Point b)
 
 vector<vector<int> > tr;
 vector<Point> p;
+vector<Point> v;
 
 int main()
 {
@@ -98,6 +104,7 @@ int main()
     scanf("%i %i", &n, &m);
     p.resize(n);
     tr.resize(n);
+    v.resize(n);
     for (i = 0; i < m; i++)
     {
         scanf("%i %i", &a, &b);
@@ -106,9 +113,13 @@ int main()
         tr[a].push_back(b);
         tr[b].push_back(a);
     }
+    vector<ld> gr(n);
+    for (i = 0; i < n; i++)
+        gr[i] = i * pi / n;
+    random_shuffle(gr.begin(), gr.end());
     for (i = 0; i < n; i++)
     {
-        p[i] = randp();
+        p[i] = Point(DIST * cos(gr[i]), DIST * sin(gr[i]));
 //        cout << p[i].x << ' ' << p[i].y << endl;
     }
 
@@ -116,12 +127,15 @@ int main()
 //    {
 //        printf("%f %f\n", p[i].x, p[i].y);
 //    }
+//    ld fctr = FACTOR;
     for (int iter = 0; iter < ITERATION_COUNT; iter++)
     {
+//        fctr *= DEC;
         Point cntr = Point(0, 0);
         for (i = 0; i < n; i++)
         {
             Point force = Point();
+//            force = force / force.len() * fctr;
             for (j = 0; j < n; j++)
                 if (i != j)
                 {
@@ -131,7 +145,9 @@ int main()
             {
                 force = force + edge_force(p[i], p[v]);
             }
-            p[i] = p[i] + (force * MOVE_DIST);
+            v[i] = v[i] + (force * MOVE_DIST);
+            v[i] = v[i] * DEC;
+            p[i] = p[i] + v[i];
         }
         for (i = 0; i < n; i++)
         {
@@ -148,18 +164,27 @@ int main()
         }
         cerr << endl;
     }
-    ld mx, my;
+    for (i = 0; i < n; i++)
+    {
+        cerr << p[i].x << ' ' << p[i].y << endl;
+    }
+    cerr << endl;
+    ld mx, my, bx, by;
     mx = p[0].x;
     my = p[0].y;
+    bx = p[0].x;
+    by = p[0].y;
     for (i = 1; i < n; i++)
     {
         mx = min(mx, p[i].x);
         my = min(my, p[i].y);
+        bx = max(bx, p[i].x);
+        by = max(bx, p[i].y);
     }
     printf("%i\n", n);
     for (i = 0; i < n; i++)
     {
-        printf("%f %f\n", (p[i].x - mx + 2) * 20, (p[i].y - my + 2) * 20);
+        printf("%f %f\n", ((p[i].x - mx + 2) * 200) / (bx - mx + 2) + 20, ((p[i].y - my + 2) * 200) / (by - my + 2) + 20);
     }
     int mt[n][n];
     for (i = 0; i < n; i++)
