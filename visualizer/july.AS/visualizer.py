@@ -19,6 +19,7 @@ vertexNum = 0
 WAIT = 0
 ADD_VERTEX = 1
 ADD_EDGE = 2
+MOVE_VERTEX = 3
 whatToDo = WAIT
 focus1, focus2 = -1, -1
 
@@ -79,7 +80,7 @@ def loadGraph(e):
 	whatToDo = WAIT
 
 def interactive(e):
-	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2
+	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2, MOVE_VERTEX
 	if whatToDo == ADD_VERTEX:
 		print('Adding vertex...')
 		if vertexNum == maxVertex:
@@ -117,6 +118,21 @@ def interactive(e):
 				update()
 				print('Unselected')
 
+vertexToMove = -1
+def moveVertexInteractive(e):
+	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2, MOVE_VERTEX, vertexToMove
+	if whatToDo != MOVE_VERTEX:
+		return
+	if vertexToMove == -1:
+		for i in range(vertexNum):
+			ro = sqrt(((pos[i][0] - e.x) ** 2) + ((pos[i][1] - e.y) ** 2))
+			if 1.3 * ro <= vertexR:
+				vertexToMove = i
+				break
+	else:
+		pos[vertexToMove][0], pos[vertexToMove][1] = e.x, e.y
+		update()
+
 def addVertexStatus(e):
 	global whatToDo, ADD_VERTEX
 	whatToDo = ADD_VERTEX
@@ -128,6 +144,16 @@ def addEdgeStatus(e):
 	focus1, focus2 = -1, -1
 	print('Add some edges')
 
+def moveVertexStatus(e):
+	global whatToDo, MOVE_VERTEX, vertexToMove
+	whatToDo = MOVE_VERTEX
+	vertexToMove = -1
+	print('Move vertex!')
+
+def unfocusVertex(e):
+	global vertexToMove
+	vertexToMove = -1
+
 # начало графики
 root = Tk()
 
@@ -135,27 +161,33 @@ root = Tk()
 root.title("Visualizer-1.0")
 root.geometry("900x500")
 
-addEdgeButton = Button(root, text="Add(Delete) Edge", width = 30, height = 4, bg = "white", fg = "red")
-addVertexButton = Button(root, text="Add(Delete) Vertex", width = 30, height = 4, bg = "white", fg = "red")
-saveGraphButton = Button(root, text="Save Graph to graph_save.txt", width = 30, height = 4, bg = "white", fg = "red")
-loadGraphButton = Button(root, text="Load Graph from graph_read.txt", width = 30, height = 4, bg = "white", fg = "red")
+buttonWidth = 25
+addEdgeButton = Button(root, text="Add(Delete) Edge", width = buttonWidth, height = 4, bg = "white", fg = "red")
+addVertexButton = Button(root, text="Add(Delete) Vertex", width = buttonWidth, height = 4, bg = "white", fg = "red")
+saveGraphButton = Button(root, text="Save Graph to graph_save.txt", width = buttonWidth, height = 4, bg = "white", fg = "red")
+loadGraphButton = Button(root, text="Load Graph from graph_read.txt", width = buttonWidth, height = 4, bg = "white", fg = "red")
+moveVertexButton = Button(root, text="Move Vertex", width = buttonWidth, height = 4, bg = "white", fg = "red")
 
 addEdgeButton.grid(row = 0, column = 0)
 addVertexButton.grid(row = 0, column = 1)
 saveGraphButton.grid(row = 0, column = 2)
 loadGraphButton.grid(row = 0, column = 3)
+moveVertexButton.grid(row = 0, column = 4)
 
 # bind'им кнопки
 saveGraphButton.bind("<Button-1>", saveGraph)
 loadGraphButton.bind("<Button-1>", loadGraph)
 addVertexButton.bind("<Button-1>", addVertexStatus)
 addEdgeButton.bind("<Button-1>", addEdgeStatus)
+moveVertexButton.bind("<Button-1>", moveVertexStatus)
 
 # создание графа
 
 graph = Canvas(root, width = 850, height = 400)
-graph.grid(row = 1, column = 0, columnspan = 4)
+graph.grid(row = 1, column = 0, columnspan = 5)
 graph.bind("<Button-1>", interactive)
+graph.bind("<B1-Motion>", moveVertexInteractive)
+graph.bind("<ButtonRelease-1>", unfocusVertex)
 
 # Start the window's event-loop
 root.mainloop()
