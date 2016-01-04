@@ -27,12 +27,12 @@ pnt.__sub__ = lambda a, b: pnt(a.x - b.x, a.y - b.y)
 # create the root window
 
 maxVertex = 100
-vertexR = 5
+vertexR = 8
 vertexNum = 0
 WAIT = 0
 ADD_VERTEX = 1
 ADD_EDGE = 1
-whatToDO = WAIT
+whatToDo = WAIT
 
 # граф хранится матрицой смежности
 w = [[0] * maxVertex for i in range(maxVertex)]
@@ -50,17 +50,17 @@ def saveGraph(e):
 			fout.write(str(w[i][j]) + ' ')
 		fout.write('\n')
 	fout.close()
+	whatToDo = WAIT
 	print('saved')
 
 def update():
 	global graph, vertexR, vertexNum, pos
 	for i in range(vertexNum):
-		graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "green", outline="#00aa00")
+		graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="black")
 	for i in range(vertexNum):
 		for j in range(i):
 			if w[i][j]:
 				graph.create_line(pos[i][0], pos[i][1], pos[j][0], pos[j][1])
-	print('updated')
 
 def loadGraph(e):
 	global vertexNum, pos, w
@@ -76,11 +76,13 @@ def loadGraph(e):
 			w[i][j] = int(w[i][j])
 
 	fin.close()
+	whatToDo = WAIT
 	update()
 
 def interactive(e):
 	global whatToDo, vertexNum, pos, w
 	if whatToDo == ADD_VERTEX:
+		print('Adding vertex...')
 		if vertexNum == maxVertex:
 			print('Too much verteces...')
 		else:
@@ -92,7 +94,7 @@ def interactive(e):
 def addVertexStatus(e):
 	global whatToDo, ADD_VERTEX
 	whatToDo = ADD_VERTEX
-	print(whatToDo)
+	print('Add some verteces')
 	
 
 # начало графики
