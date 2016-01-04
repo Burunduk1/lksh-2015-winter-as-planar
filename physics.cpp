@@ -9,7 +9,7 @@ using namespace std;
 
 typedef double ld;
 
-const int ITERATION_COUNT = 100;
+const int ITERATION_COUNT = 200;
 const ld DEC = 0.9;
 const ld MOVE_DIST = 0.1;
 const ld GRAVITY = -2;
