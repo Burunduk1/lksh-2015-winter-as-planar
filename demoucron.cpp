@@ -35,6 +35,7 @@ int dfs1(int v, int prev)
             continue;
         }
         if (was[t]) {
+            fs[0].push_back(e.second);
             return t;
         } else {
             int q;
@@ -83,6 +84,7 @@ int main()
         vp[es[e].a] = 1;
         vp[es[e].b] = 1;
     }
+    fs.push_back({});
     fs[1] = fs[0];
     reverse(fs[1].begin(), fs[1].end());
     return 0;
