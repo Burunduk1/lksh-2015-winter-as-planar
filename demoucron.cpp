@@ -2,11 +2,11 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
+#include <list>
 
 using namespace std;
 
-struct edge
-{
+struct edge {
     int a, b, id;
 };
 const int maxn = 1e5;
@@ -52,12 +52,12 @@ int dfs1(int v, int prev)
 }
 
 int compcol[maxm];
-int vertice_compcol[maxn];
+int vertex_compcol[maxn];
 
 void dfs2(int v, int color)
 {
     was[v] = 1;
-    vertice_compcol[v] = color;
+    vertex_compcol[v] = color;
     for (auto &e: g[v]) {
         const int t = e.first;
         if (!vp[t] && !was[v]) {
@@ -66,6 +66,10 @@ void dfs2(int v, int color)
         }
     }
 }
+
+vector<int> found_path;
+
+void dfs3(int v, 
 
 int main()
 {
@@ -105,8 +109,26 @@ int main()
         }
     }
     for (int i = 0; i < n; i++) {
-        cout << vertice_compcol[i] << " ";
+        cout << vertex_compcol[i] << " ";
     }
     cout << endl;
+    vector<int> left_edges(m);
+    vector<list<int>> to_components;
+    for (int u: fs[0])
+        for (edge& e: g[u])
+            if (!vp[e.first]) {
+                left_edges.push_back(e.id);
+                to_components[e.id] = {0, 1};
+            }
+    while (left_edges.size()) {
+        int ans = left_edges[0];
+        for (int u: left_edges) {
+            if (to_components[u].size() < to_components[ans].size()) {
+                ans = u;
+            }
+        }
+        assert(to_components[ans].size());
+                
+    }
     return 0;
 }

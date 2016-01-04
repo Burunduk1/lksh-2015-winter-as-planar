@@ -1,0 +1,3 @@
+To run gen.java and gen2.java print "7".
+
+
