@@ -121,9 +121,14 @@ bool block_edfs(int u, int facet, int lv) {
 	return 0;
 }
 
+#define file ""
+
 int main(){
+	freopen(file"in", "r", stdin);
+	freopen(file"out", "w", stdout);
     int n, qm, m = 0;
     cin >> n >> qm;
+    cerr << n << "\n";
     bool flag = 0;
     for (int i = 0; i < n; i++){
     	p[i] = i;
@@ -166,25 +171,29 @@ int main(){
     	return 0;
     }
     for (auto v: cycle)
+    	cerr << v << " ";
+    cerr << "\n";
+    for (auto v: cycle)
     	blocked[v] = 1;
     f_ver[f_cnt++] = cycle;
     f_ver[f_cnt++] = cycle;
     
     memset(used, 0, sizeof(used));
     for (int i = 0; i < m; ++i) {
-    	if (!used[i]){
+    	pii &e = edges[i];
+    	if (!used[i] && (!blocked[e.F] || !blocked[e.S])){
     		c_fac[c_cnt] = {0, 1};
       		c_fac_len[c_cnt++] = 2;
       		c_edfs(i);       	
     	}
     }
 
-    for (;;) {
+    for (;;) {       
     	///Here we find a component to place
-    	int cur_c = 0;
-        for (int i = 1; i < c_cnt; ++i)
+    	int cur_c = -1;
+        for (int i = 0; i < c_cnt; ++i)
         	if (c_fac_len[i] < c_fac_len[cur_c]) cur_c = i;
-        if (c_fac_len[cur_c] == INF) break;
+        if (cur_c == -1 || c_fac_len[cur_c] == INF) break;
         if (c_fac_len[cur_c] == 0) {
         	cout << "-1\n";
         	cerr << "C_FAC_LEN = 0\n";
@@ -207,8 +216,13 @@ int main(){
     	memset(used, 0, sizeof(used));
     	b_path = {start_v};
     	block_edfs(start_e, cur_f, start_v);
-    	for (auto v: b_path) blocked[v] = 1;
-    	
+    	cerr << "ok\n";
+    	for (auto v: b_path) {
+    		cerr << v << " ";
+    		blocked[v] = 1;
+    	}
+    	cerr << "\n";
+
     	///Here we divide the component into new components
     	memset(used, 0, sizeof(used));
     	for (int i = 0; i < c_eds[cur_c].size(); ++i) {
@@ -245,6 +259,8 @@ int main(){
     			ink3[i] = 1;
     		}
     	}
+    	ink1[b_path[0]] = false;
+    	ink1[b_path.back()] = false;
     	for (int i = 0; i < c_cnt; ++i) {
     		if (c_fac_len[i] == INF) continue;
     		bool flag = false;
@@ -271,7 +287,6 @@ int main(){
 				cout << "-1\n";
 				return 0;
 			}
-    		if (k1)
     		if (k1 && !k2 && !k3) {
     			assert(c_fac[i].size() == 0);
     			c_fac[i].pb(fk2);
