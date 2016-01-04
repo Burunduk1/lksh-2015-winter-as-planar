@@ -28,16 +28,15 @@ pnt.__sub__ = lambda a, b: pnt(a.x - b.x, a.y - b.y)
 
 maxVertex = 100
 vertexR = 5
-
 vertexNum = 0
+WAIT = 0
+ADD_VERTEX = 1
+ADD_EDGE = 1
+whatToDO = WAIT
 
 # граф хранится матрицой смежности
 w = [[0] * maxVertex for i in range(maxVertex)]
 pos = [[0] * 2 for i in range(maxVertex)]
-
-WAIT = 0
-DRAW_GRAPH = 1
-whatToDO = WAIT
 
 def saveGraph(e):
 	global pos, vertexNum, w
@@ -79,6 +78,23 @@ def loadGraph(e):
 	fin.close()
 	update()
 
+def interactive(e):
+	global whatToDo, vertexNum, pos, w
+	if whatToDo == ADD_VERTEX:
+		if vertexNum == maxVertex:
+			print('Too much verteces...')
+		else:
+			pos[vertexNum][0] = e.x
+			pos[vertexNum][1] = e.y
+			vertexNum += 1
+			update()
+
+def addVertexStatus(e):
+	global whatToDo, ADD_VERTEX
+	whatToDo = ADD_VERTEX
+	print(whatToDo)
+	
+
 # начало графики
 root = Tk()
 
@@ -99,11 +115,13 @@ loadGraphButton.grid(row = 0, column = 3)
 # bind'им кнопки
 saveGraphButton.bind("<Button-1>", saveGraph)
 loadGraphButton.bind("<Button-1>", loadGraph)
+addVertexButton.bind("<Button-1>", addVertexStatus)
 
 # создание графа
 
 graph = Canvas(root, width = 300, height = 300)
 graph.grid(row = 1, column = 0)
+graph.bind("<Button-1>", interactive)
 
 # Start the window's event-loop
 root.mainloop()
