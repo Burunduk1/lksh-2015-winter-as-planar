@@ -23,22 +23,26 @@ vector<int> g[max_n];
 vector<int> cycle;
 const double dist = 20;
 double x[max_n], y[max_n];
+int gr[max_n][max_n];
+
 
 int main()
 {
     //ios_base::sync_with_stdio(0);
     //freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
+    freopen("graph_read.txt", "w", stdout);
     ios_base::sync_with_stdio(0);
     int n, m, k, a, b, n1;
     cin >> n >> m;
-    cout << n << m << endl;
+    cout << n <<endl;
     n1 = n;
     for (int i = 0; i < m ; i++){
         cin >> a >> b;
-        cout << a << b << endl;
+        //cout << a <<" " << b << endl;
         a--;
         b--;
+        gr[a][b] = true;
+        gr[b][a] = true;
         g[a].push_back(b);
         g[b].push_back(a);
     }
@@ -82,6 +86,14 @@ int main()
     cout << fixed << setprecision(3);
     //cout << n1 << endl;
     for (int i = 0; i < n1; i++)
-        cout << x[i] << " " << y[i] << endl;
+        cout << x[i] + 25 << " " << y[i] + 25 << endl;
+    for (int i = 0; i < n1; i++){
+        for (int j = 0; j < n1; j++)
+            if (gr[i][j])
+                cout << "1";
+            else
+                cout << "0";
+        cout << endl;
+    }
     return 0;
 }
