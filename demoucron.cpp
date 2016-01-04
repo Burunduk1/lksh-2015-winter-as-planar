@@ -51,11 +51,19 @@ int dfs1(int v, int prev)
     return -1;
 }
 
-void dfs2(int v)
+int compcol[maxm];
+int vertice_compcol[maxn];
+
+void dfs2(int v, int color)
 {
     was[v] = 1;
+    vertice_compcol[v] = color;
     for (auto &e: g[v]) {
-
+        const int t = e.first;
+        if (!vp[t] && !was[v]) {
+            dfs2(v, color);
+            compcol[e.second] = color;
+        }
     }
 }
 
@@ -84,8 +92,21 @@ int main()
         vp[es[e].a] = 1;
         vp[es[e].b] = 1;
     }
+    cout << endl;
     fs.push_back({});
     fs[1] = fs[0];
     reverse(fs[1].begin(), fs[1].end());
+    cw();
+    int color = 1;
+    for (int u: fs[0]) {
+        for (auto& e: g[u]) {
+            if (!vp[e.first] && !was[e.first])
+                dfs2(e.first, color++);
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        cout << vertice_compcol[i] << " ";
+    }
+    cout << endl;
     return 0;
 }
