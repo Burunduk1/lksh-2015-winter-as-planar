@@ -5,7 +5,9 @@
 # Выделение вершин, ребро между которыми хотим добавить
 # Запихать координаты в данный прямоугольник
 
-import sys, time
+import sys, time, threading
+
+killed = False
 
 from tkinter import *
 from math import sqrt
@@ -20,8 +22,11 @@ WAIT = 0
 ADD_VERTEX = 1
 ADD_EDGE = 2
 MOVE_VERTEX = 3
+PHYSICS_MOVE = 4
 whatToDo = WAIT
 focus1, focus2 = -1, -1
+physicsPowConst = 0.7
+physicsDistConst = 100
 
 # граф хранится матрицой смежности
 w = [[0] * maxVertex for i in range(maxVertex)]
@@ -53,6 +58,7 @@ def update():
 			VERTS[i] = graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="blue", width=2)
 		else:
 			VERTS[i] = graph.create_oval(pos[i][0] - vertexR, pos[i][1] - vertexR, pos[i][0] + vertexR, pos[i][1] + vertexR, fill = "red", outline="red", width=2)
+		graph.create_text(pos[i][0] - vertexR - 3, pos[i][1] - vertexR - 3, text=str(i + 1))
 	for i in range(vertexNum):
 		for j in range(i):
 			if w[i][j]:
@@ -80,7 +86,7 @@ def loadGraph(e):
 	whatToDo = WAIT
 
 def interactive(e):
-	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2, MOVE_VERTEX
+	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2, MOVE_VERTEX, PHYSICS_MOVE
 	if whatToDo == ADD_VERTEX:
 		print('Adding vertex...')
 		if vertexNum == maxVertex:
@@ -129,9 +135,9 @@ def moveVertexInteractive(e):
 			if 1.3 * ro <= vertexR:
 				vertexToMove = i
 				break
-	else:
-		pos[vertexToMove][0], pos[vertexToMove][1] = e.x, e.y
-		update()
+	pos[vertexToMove][0] = e.x
+	pos[vertexToMove][1] = e.y
+	update()
 
 def addVertexStatus(e):
 	global whatToDo, ADD_VERTEX
@@ -154,6 +160,57 @@ def unfocusVertex(e):
 	global vertexToMove
 	vertexToMove = -1
 
+def interactivAdd():
+	global whatToDo, vertexNum, pos, w, ADD_VERTEX, ADD_EDGE, focus1, focus2, MOVE_VERTEX, PHYSICS_MOVE
+	while not killed:
+		s = list(sys.stdin.readline().split())
+		# add_e u v(добавляет ребро u v)
+		# delete_e u v(удаляет ребро u v)
+		# add_v x y(добавляет новую вершину)
+		# ch_pos v x y(изменить позицию вершины v на позицию x, y)
+		for i in range(1, len(s)):
+			s[i] = int(s[i])
+		if s[0] == 'add_e':
+			u, v = s[1], s[2]
+			if u > vertexNum or v > vertexNum:
+				print('Incorrect verteces')
+				continue
+			u -= 1
+			v -= 1
+			if w[u][v]:
+				print('The edge already exists')
+				continue
+			w[u][v] = w[v][u] = 1
+			print('successefully added')
+		elif s[0] == 'delete_e':
+			u, v = s[1], s[2]
+			if u > vertexNum or v > vertexNum:
+				print('Incorrect verteces')
+				continue
+			u -= 1
+			v -= 1
+			if not w[u][v]:
+				print('Already deleted')
+				continue
+			w[u][v] = w[v][u] = 0
+			print('successefully deleted', u + 1, v + 1)
+		elif s[0] == 'add_v':
+			x, y = s[1], s[2]
+			pos[vertexNum][0], pos[vertexNum][1] = x, y
+			vertexNum += 1
+		elif s[0] == 'ch_pos':
+			v, x, y = s[1], s[2], s[3]
+			if v > vertexNum:
+				print('Incorrect vertex')
+				continue
+			v -= 1
+			pos[v][0], pos[v][1] = x, y
+			print('successefully changed', v, x, y)
+		update()
+
+def physicsMoveStart(e):
+	print('Nop')
+	
 # начало графики
 root = Tk()
 
@@ -161,18 +218,20 @@ root = Tk()
 root.title("Visualizer-1.0")
 root.geometry("900x500")
 
-buttonWidth = 25
-addEdgeButton = Button(root, text="Add(Delete) Edge", width = buttonWidth, height = 4, bg = "white", fg = "red")
-addVertexButton = Button(root, text="Add(Delete) Vertex", width = buttonWidth, height = 4, bg = "white", fg = "red")
-saveGraphButton = Button(root, text="Save Graph to graph_save.txt", width = buttonWidth, height = 4, bg = "white", fg = "red")
-loadGraphButton = Button(root, text="Load Graph from graph_read.txt", width = buttonWidth, height = 4, bg = "white", fg = "red")
+buttonWidth = 22
+addEdgeButton = Button(root, text="Add(Delete) Edge", width = 15, height = 4, bg = "white", fg = "red")
+addVertexButton = Button(root, text="Add(Delete) Vertex", width = 15, height = 4, bg = "white", fg = "red")
+saveGraphButton = Button(root, text="Save Graph to graph_save.txt", width = 23, height = 4, bg = "white", fg = "red")
+loadGraphButton = Button(root, text="Load Graph from graph_read.txt", width = 25, height = 4, bg = "white", fg = "red")
 moveVertexButton = Button(root, text="Move Vertex", width = buttonWidth, height = 4, bg = "white", fg = "red")
+startPhysics = Button(root, text="Start Physics", width = buttonWidth, height = 4, bg = "white", fg = "red")
 
 addEdgeButton.grid(row = 0, column = 0)
 addVertexButton.grid(row = 0, column = 1)
 saveGraphButton.grid(row = 0, column = 2)
 loadGraphButton.grid(row = 0, column = 3)
 moveVertexButton.grid(row = 0, column = 4)
+startPhysics.grid(row = 0, column = 5)
 
 # bind'им кнопки
 saveGraphButton.bind("<Button-1>", saveGraph)
@@ -180,14 +239,19 @@ loadGraphButton.bind("<Button-1>", loadGraph)
 addVertexButton.bind("<Button-1>", addVertexStatus)
 addEdgeButton.bind("<Button-1>", addEdgeStatus)
 moveVertexButton.bind("<Button-1>", moveVertexStatus)
+startPhysics.bind("<Button-1>", physicsMoveStart)
 
 # создание графа
 
 graph = Canvas(root, width = 850, height = 400)
-graph.grid(row = 1, column = 0, columnspan = 5)
+graph.grid(row = 1, column = 0, columnspan = 6)
 graph.bind("<Button-1>", interactive)
 graph.bind("<B1-Motion>", moveVertexInteractive)
 graph.bind("<ButtonRelease-1>", unfocusVertex)
 
+threading.Thread(target=interactivAdd, daemon=True).start()
+
 # Start the window's event-loop
 root.mainloop()
+
+

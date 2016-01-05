@@ -18,7 +18,7 @@ const lld K = 0.1; // масштаб
 
 const int MAX_N = 1e5;
 
-const int ITR = 100; // исло итераций
+const int ITR = 100; // число итераций
 const lld L = 0; // длинна ребра
 const lld dd = 0.01; // коэффициент шага
 const lld D = 0.999999; // коэффициент затухания шага
